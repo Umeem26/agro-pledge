@@ -1,67 +1,61 @@
-
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Env, String, Symbol, Vec};
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Env, Symbol, Address};
 
-// Struktur data yang akan menyimpan notes
+// Struktur data untuk menyimpan status pendanaan AgroPledge
 #[contracttype]
 #[derive(Clone, Debug)]
-pub struct Note {
-    id: u64,
-    title: String,
-    content: String,
+pub struct PledgeState {
+    pub target_amount: i128,
+    pub total_raised: i128,
+    pub farmer: Address,
 }
 
-// Storage key untuk data notes
-const NOTE_DATA: Symbol = symbol_short!("NOTE_DATA");
+// Storage keys
+const STATE: Symbol = symbol_short!("STATE");
+
+// Nama Event untuk sinkronisasi real-time frontend
+const PLEDGE_EVENT: Symbol = symbol_short!("pledged");
 
 #[contract]
-pub struct NotesContract;
+pub struct AgroPledgeContract;
 
 #[contractimpl]
-impl NotesContract {
-    pub fn get_notes(env: Env) -> Vec<Note> {
-        // 1. ambil data notes dari storage
-        return env.storage().instance().get(&NOTE_DATA).unwrap_or(Vec::new(&env));
-    }
-
-    // Fungsi untuk membuat note baru
-    pub fn create_note(env: Env, title: String, content: String) -> String {
-        // 1. ambil data notes dari storage
-        let mut notes: Vec<Note> = env.storage().instance().get(&NOTE_DATA).unwrap_or(Vec::new(&env));
-        
-        // 2. Buat object note baru
-        let note = Note {
-            id: env.prng().gen::<u64>(),
-            title: title,
-            content: content,
-        };
-        
-        // 3. tambahkan note baru ke notes lama
-        notes.push_back(note);
-        
-        // 4. simpan notes ke storage
-        env.storage().instance().set(&NOTE_DATA, &notes);
-        
-        return String::from_str(&env, "Notes berhasil ditambahkan");
-    }
-
-    // Fungsi untuk menghapus notes berdasarkan id
-    pub fn delete_note(env: Env, id: u64) -> String {
-        // 1. ambil data notes dari storage 
-        let mut notes: Vec<Note> = env.storage().instance().get(&NOTE_DATA).unwrap_or(Vec::new(&env));
-
-        // 2. cari index note yang akan dihapus menggunakan perulangan
-        for i in 0..notes.len() {
-            if notes.get(i).unwrap().id == id {
-                notes.remove(i);
-
-                env.storage().instance().set(&NOTE_DATA, &notes);
-                return String::from_str(&env, "Berhasil hapus notes");
-            }
+impl AgroPledgeContract {
+    // 1. Inisialisasi Proyek Tani (Menentukan Target Modal & Alamat Petani)
+    pub fn initialize(env: Env, farmer: Address, target: i128) {
+        if env.storage().instance().has(&STATE) {
+            panic!("Proyek sudah di-inisialisasi!");
         }
+        
+        let state = PledgeState {
+            target_amount: target,
+            total_raised: 0,
+            farmer,
+        };
+        env.storage().instance().set(&STATE, &state);
+    }
 
-        return String::from_str(&env, "Notes tidak ditemukan")
+    // 2. Fungsi Setor Modal (Write Data + Trigger Event)
+    pub fn pledge_funds(env: Env, investor: Address, amount: i128) -> i128 {
+        investor.require_auth(); // Memastikan tanda tangan dompet investor sah
+
+        let mut state: PledgeState = env.storage().instance().get(&STATE).expect("Kontrak belum siap.");
+        
+        // Update saldo total modal yang terkumpul
+        state.total_raised += amount;
+        env.storage().instance().set(&STATE, &state);
+
+        // Kunci Utama Level 2: Mengirim Event Real-Time ke Jaringan Stellar
+        env.events().publish(
+            (PLEDGE_EVENT, investor), 
+            amount
+        );
+
+        return state.total_raised;
+    }
+
+    // 3. Fungsi Ambil Data Status Pendanaan (Read Data)
+    pub fn get_status(env: Env) -> PledgeState {
+        env.storage().instance().get(&STATE).expect("Kontrak tidak ditemukan.")
     }
 }
-
-mod test;
