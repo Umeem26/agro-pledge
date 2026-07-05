@@ -59,3 +59,6 @@ impl AgroPledgeContract {
         env.storage().instance().get(&STATE).expect("Kontrak tidak ditemukan.")
     }
 }
+
+#[cfg(test)]
+mod test;
