@@ -1,4 +1,4 @@
-import { StellarWalletsKit, WalletType } from "https://esm.sh/@stellar/stellar-wallets-kit";
+import { StellarWalletsKit, WalletType } from "https://esm.sh/@creit.tech/stellar-wallets-kit";
 import StellarSdk from "https://esm.sh/@stellar/stellar-sdk";
 
 // Alamat Kontrak Pintar AgroPledge Hasil Deploy CLI Level 2
