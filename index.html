@@ -3,60 +3,553 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroPledge - Investor Portal (Level 2)</title>
+    <title>AgroPledge - Decentalized Agricultural Crowdfunding</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #121212; color: #ffffff; }
-        .card { border: 1px solid #333; padding: 20px; border-radius: 8px; background: #1e1e1e; max-width: 450px; }
-        button { background-color: #00e676; color: black; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
-        button:disabled { background-color: #555; color: #aaa; cursor: not-allowed; }
-        .input-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; color: #aaa; font-size: 14px; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; }
-        #status { margin-top: 15px; color: #ffcc00; word-break: break-all; font-weight: bold; padding: 10px; border-radius: 4px; background: #2a2307; border: 1px solid #665200; }
-        .event-log { margin-top: 15px; background: #111; padding: 10px; border-radius: 4px; border: 1px solid #222; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #00e676; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-dark: #070a13;
+            --card-bg: rgba(17, 24, 39, 0.75);
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.25);
+            --primary-hover: #34d399;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #f59e0b;
+            --accent-bg: rgba(245, 158, 11, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --input-bg: #0d1222;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.2s ease-in-out;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #0d3827, #070a13 60%);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .header-panel {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .network-badge {
+            background-color: var(--accent-bg);
+            color: var(--accent);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .network-badge::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        /* Wallet Section Style */
+        .wallet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .wallet-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .wallet-label {
+            color: var(--text-muted);
+        }
+
+        .wallet-value {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: #ffffff;
+        }
+
+        .wallet-value.balance {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        /* Button Styling */
+        button {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #070a13;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #34d399, #10b981);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .progress-bar-bg {
+            background-color: rgba(255, 255, 255, 0.05);
+            height: 10px;
+            border-radius: 9999px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #10b981, #34d399);
+            height: 100%;
+            width: 0%;
+            border-radius: 9999px;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Inputs */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            padding-right: 60px;
+            border-radius: 10px;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 16px;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .quick-amounts {
+            display: flex;
+            gap: 8px;
+        }
+
+        .quick-amount-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .quick-amount-btn:hover {
+            color: #ffffff;
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        /* Status Console */
+        .status-console {
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border: 1px solid transparent;
+        }
+
+        .status-idle {
+            background-color: rgba(255, 255, 255, 0.02);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.05);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: var(--accent);
+        }
+
+        .status-success {
+            background-color: var(--success-bg);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-error {
+            background-color: var(--danger-bg);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .tx-link {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: inherit;
+            text-decoration: underline;
+            word-break: break-all;
+            margin-top: 4px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        /* Live Event Log Feed */
+        .events-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .feed-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--primary);
+        }
+
+        .feed-indicator::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.2s infinite;
+        }
+
+        .event-log {
+            background-color: #05080e;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 16px;
+            flex-grow: 1;
+            max-height: 380px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .event-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            padding-bottom: 8px;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .event-time {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .event-tag {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .event-body {
+            color: #ffffff;
+            margin-top: 2px;
+            word-break: break-all;
+        }
+
+        .event-hash {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .event-hash:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <h2>🌱 AgroPledge - Investor Portal (Level 2 Yellow Belt)</h2>
-    
-    <div class="card">
-        <!-- Tombol Connect Multi-Wallet -->
-        <button id="btn-connect">Connect Wallet (Multi-Wallet)</button>
-        
-        <!-- Tampilan Alamat & Saldo -->
-        <div class="input-group">
-            <p><strong>Wallet Address:</strong> <br><span id="wallet-address" style="font-size: 12px; color: #aaa;">-</span></p>
-            <p><strong>XLM Balance:</strong> <span id="wallet-balance">-</span> XLM</p>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-panel">
+            <h1 class="brand">🌱 AgroPledge</h1>
+            <div class="network-badge">Stellar Testnet</div>
         </div>
 
-        <hr style="border-color: #333; margin: 20px 0;">
+        <!-- Left Side: Platform Interaction Card -->
+        <div class="card">
+            <h2 class="card-title">Investor Portal</h2>
 
-        <!-- Formulir Kontrak Pintar AgroPledge -->
-        <h3>Escrow Crowdfunding Tani</h3>
-        <p style="font-size: 11px; color: #888;">Contract ID: CB27QCP...7VQD</p>
-        
-        <div class="input-group">
-            <div id="contract-live-status" style="font-size: 14px; color: #00e676; margin-bottom: 10px;">
-                Total Dana Terkumpul: <span id="live-raised">Loading...</span> XLM
+            <!-- Connection Status -->
+            <div class="wallet-info">
+                <div class="wallet-row">
+                    <span class="wallet-label">Connected Address:</span>
+                    <span class="wallet-value" id="wallet-address">Not Connected</span>
+                </div>
+                <div class="wallet-row">
+                    <span class="wallet-label">Investor Balance:</span>
+                    <span class="wallet-value balance"><span id="wallet-balance">0.00</span> XLM</span>
+                </div>
+            </div>
+
+            <!-- Connect Button -->
+            <button class="btn-primary" id="btn-connect">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M16 12h6"/></svg>
+                Connect Wallet
+            </button>
+
+            <!-- Campaign Stats -->
+            <div class="progress-container">
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <span style="color: var(--text-muted);">Sumatra Organic Coffee Crowdfunding</span>
+                    <span style="font-weight: 600;" id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 2px;">
+                    <span style="font-weight: 600;"><span id="live-raised">0</span> XLM Raised</span>
+                    <span style="color: var(--text-muted);">Goal: <span id="target-amount">1,000</span> XLM</span>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted); word-break: break-all; margin-top: 4px;">
+                    Contract ID: <span id="lbl-contract-id">CB27QCP...7VQD</span>
+                </div>
+            </div>
+
+            <!-- Contribution Action -->
+            <div class="input-group">
+                <label for="amount">Commit Contribution</label>
+                <div class="input-wrapper">
+                    <input type="number" id="amount" placeholder="0.0" min="1" disabled>
+                    <span class="input-suffix">XLM</span>
+                </div>
+                <div class="quick-amounts">
+                    <button class="quick-amount-btn" onclick="setAmount(50)">+50</button>
+                    <button class="quick-amount-btn" onclick="setAmount(100)">+100</button>
+                    <button class="quick-amount-btn" onclick="setAmount(250)">+250</button>
+                    <button class="quick-amount-btn" onclick="setAmount(500)">+500</button>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="btn-pledge" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Pledge Funds
+            </button>
+
+            <!-- Feedback status -->
+            <div class="status-console status-idle" id="status-box">
+                <span id="status-title" style="font-weight: 700;">System Console</span>
+                <span id="status-desc">Ready to sync. Connect a wallet to start.</span>
+                <a id="status-tx-link" class="tx-link" style="display: none;" target="_blank">View on StellarExplorer</a>
             </div>
         </div>
 
-        <div class="input-group">
-            <label>Jumlah Komitmen Investasi (XLM):</label>
-            <input type="number" id="amount" placeholder="Contoh: 50" min="1">
+        <!-- Right Side: Events Log Panel -->
+        <div class="card events-panel">
+            <div class="feed-header">
+                <span>📡 Live Contract Events</span>
+                <div class="feed-indicator">SYNCING</div>
+            </div>
+            <div class="event-log" id="event-feed">
+                <div class="event-item">
+                    <span class="event-time">[System]</span> <span class="event-body">Connecting to Soroban RPC server...</span>
+                </div>
+            </div>
         </div>
-        <button id="btn-pledge" disabled>Setor Dana ke Kontrak</button>
-
-        <!-- Umpan Balik Status Transaksi -->
-        <div id="status">Status: Menunggu Koneksi Dompet...</div>
-
-        <!-- Log Real-Time Live Events Blockchain -->
-        <h4 style="margin-bottom: 5px; margin-top: 20px; color: #aaa;">📡 Live Event Feed:</h4>
-        <div class="event-log" id="event-feed">Memulai sinkronisasi jaringan...</div>
     </div>
 
-    <!-- Script utama -->
+    <!-- Inline globally accessible helpers -->
+    <script>
+        function setAmount(val) {
+            const input = document.getElementById("amount");
+            if (!input.disabled) {
+                input.value = val;
+            }
+        }
+    </script>
+
+    <!-- Core App Logic -->
     <script type="module" src="index.js"></script>
 </body>
-</html>
+</html>
