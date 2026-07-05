@@ -1,0 +1,37 @@
+# Rust / Cargo Build Output
+/target/
+Cargo.lock
+
+# Node / JS Dependencies
+/node_modules/
+package-lock.json
+package.json
+
+# IDE / Editor Settings
+/.vscode/
+.idea/
+*.suo
+*.ntvsca
+*.ntvsct
+*.md.user
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Log Files
+*.log
+
+# Flutter Mobile Build Outputs
+/agro_pledge_mobile/.dart_tool/
+/agro_pledge_mobile/build/
+/agro_pledge_mobile/.packages
+/agro_pledge_mobile/android/local.properties
+/agro_pledge_mobile/ios/Flutter/Generated.xcconfig
+/agro_pledge_mobile/ios/Flutter/flutter_export_environment.sh
+/agro_pledge_mobile/pubspec.lock
+
+# Test and Documentation Folders
+/docs/
+**/test_snapshots/
+

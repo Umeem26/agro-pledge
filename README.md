@@ -44,7 +44,7 @@ The Soroban smart contract is built in Rust, successfully compiled to WebAssembl
     *   `pledge_funds`: Escrows investment tokens (XLM) from B2B buyers into the contract.
     *   `get_status`: Returns current funding statistics (total raised, goals reached).
 
-### 2. 🖥️ Web Portal Portal (Frontend Integration)
+### 2. 🖥️ Web Portal (Frontend Level 2)
 The client interface interacts directly with the Stellar Testnet and features:
 *   **Multi-Wallet Connection Kit:** Integrated `@creit.tech/stellar-wallets-kit` enabling a connection modal supporting various Stellar ecosystem wallets (Freighter, Albedo, xBull, etc.).
 *   **Robust Error Handling:** Handles three critical client error vectors:
@@ -52,6 +52,13 @@ The client interface interacts directly with the Stellar Testnet and features:
     2.  *Insufficient Balance*: Intercepts `op_underfunded` errors before/during submission.
     3.  *Wallet Not Found*: Detects missing extensions or failed API initializations.
 *   **Real-Time Status & Events:** Visual progress indicators (Pending / Success / Fail states) and a live polling event stream simulating/monitoring on-chain contract events.
+
+### 3. 📱 Flutter Mobile Application (Frontend Level 2)
+A fully functional mobile client built using **Flutter** and **Dart** for premium mobile experience:
+*   **Stellar Flutter SDK**: Integrated `stellar_flutter_sdk` to perform Soroban RPC simulations, read contract status (`get_status`), sign transactions locally via keypairs, and send requests.
+*   **Onboarding & Credential Console**: Offers dynamic selection between Investor and Farmer portals, containing an integrated testnet wallet generator and Friendbot funder utility.
+*   **Milestone-Based Escrow Tracker**: Visualizes the locked/unlocked state of the 50% Upfront working capital and 50% post-harvest settlement milestones.
+*   **Investor & Farmer Dashboards**: Separated dashboards displaying live blockchain logs, campaign progress bars, and pledge/milestone claim buttons.
 
 ---
 
@@ -77,9 +84,27 @@ Immutable cryptographic verification proving successful operations execution, cl
 </p>
 
 ### 4. Multi-Wallet Connection Modal
-Integrated wallet selection dialog displayed dynamically when the investor connects their wallet.
+Integrated wallet selection dialog displayed dynamically when the investor connects their wallet on the web portal.
 <p align="center">
   <img src="./screenshots/ss_multiwallet.png" alt="Multi-Wallet Dialog Integration" width="85%">
+</p>
+
+### 5. Flutter Mobile App Onboarding Screen
+Visual setup screen allowing keypair generation and Friendbot testing console integration.
+<p align="center">
+  <img src="./screenshots/ss_mobile_onboarding.png" alt="Flutter Mobile Onboarding Screen" width="50%">
+</p>
+
+### 6. Flutter Mobile App Investor Dashboard
+Frosted dark emerald dashboard allowing retail buyers to submit Soroban pledges and view live feeds.
+<p align="center">
+  <img src="./screenshots/ss_mobile_investor.png" alt="Flutter Mobile Investor Dashboard" width="50%">
+</p>
+
+### 7. Flutter Mobile App Farmer Dashboard
+Disbursement interface allowing local farmers to trigger milestone claims.
+<p align="center">
+  <img src="./screenshots/ss_mobile_farmer.png" alt="Flutter Mobile Farmer Dashboard" width="50%">
 </p>
 
 ---
@@ -103,13 +128,15 @@ cargo build --target wasm32-unknown-unknown --release
 cargo test
 ```
 
-4. Run the frontend portal locally:
-You can serve `index.html` using a local web server (e.g. Python's built-in HTTP server or VS Code's Live Server):
+4. Run the Web Portal locally:
 ```bash
-# Python
-python -m http.server 5500
-
-# Node.js
+# Serves index.html on port 5500
 npx http-server -p 5500
 ```
 Open `http://127.0.0.1:5500/` in your browser.
+
+5. Run the Flutter Mobile App locally:
+```bash
+cd agro_pledge_mobile
+flutter run -d chrome
+```
