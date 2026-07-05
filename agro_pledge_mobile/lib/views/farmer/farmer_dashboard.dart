@@ -149,12 +149,15 @@ class _FarmerDashboardState extends State<FarmerDashboard> {
       body: RefreshIndicator(
         onRefresh: _refreshDashboard,
         color: AppColors.accentGreen,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 650),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
               // 1. Account details header
               Container(
                 padding: const EdgeInsets.all(16),
@@ -477,7 +480,9 @@ class _FarmerDashboardState extends State<FarmerDashboard> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Color _getStatusBgColor() {
