@@ -1,13 +1,13 @@
 # 🌱 AgroPledge — Decentralized Forward Contract Platform
 
 <p align="center">
-  <strong>APAC Stellar Hackathon 2026 — Level 2 Yellow Belt Submission</strong>
+  <strong>APAC Stellar Hackathon 2026 — Level 3 Orange Belt Submission</strong>
 </p>
 
 <p align="center">
   <a href="#-project-overview">Overview</a> •
   <a href="#-track--identity">Identity</a> •
-  <a href="#-level-2-milestones-verification">Milestones</a> •
+  <a href="#-level-3-milestones-verification">Milestones</a> •
   <a href="#-smart-contract-information">Smart Contract</a> •
   <a href="#-frontend-integration">Frontend</a> •
   <a href="#-proof-of-execution">Proof of Execution</a>
@@ -31,9 +31,9 @@ This public repository serves as the single immutable workspace tracking the dev
 
 ---
 
-## ⚡ Level 2 Milestones Verification
+## ⚡ Level 3 Milestones Verification
 
-All technical baselines mandated by the Level 2 (Yellow Belt) specification have been successfully built, validated, and deployed:
+All technical baselines mandated by the Level 3 (Orange Belt) specification have been successfully built, validated, and deployed:
 
 ### 1. ⚙️ Smart Contract (Soroban Backend)
 The Soroban smart contract is built in Rust, successfully compiled to WebAssembly, and deployed on the **Stellar Testnet** under the developer account identity `walletumem`.
@@ -53,7 +53,7 @@ The client interface interacts directly with the Stellar Testnet and features:
     3.  *Wallet Not Found*: Detects missing extensions or failed API initializations.
 *   **Real-Time Status & Events:** Visual progress indicators (Pending / Success / Fail states) and a live polling event stream simulating/monitoring on-chain contract events.
 
-### 3. 📱 Flutter Mobile Application (Frontend Level 2)
+### 3. 📱 Flutter Mobile Application (Frontend Level 3)
 A fully functional mobile client built using **Flutter** and **Dart** for premium mobile experience:
 *   **Stellar Flutter SDK**: Integrated `stellar_flutter_sdk` to perform Soroban RPC simulations, read contract status (`get_status`), sign transactions locally via keypairs, and send requests.
 *   **Onboarding & Credential Console**: Offers dynamic selection between Investor and Farmer portals, containing an integrated testnet wallet generator and Friendbot funder utility.
@@ -105,6 +105,18 @@ Frosted dark emerald dashboard allowing retail buyers to submit Soroban pledges 
 Disbursement interface allowing local farmers to trigger milestone claims.
 <p align="center">
   <img src="./screenshots/ss_mobile_farmer.png" alt="Flutter Mobile Farmer Dashboard" width="50%">
+</p>
+
+### 8. Automated Smart Contract Test Suites (4/4 Passed)
+Rust cargo testing framework validating all state mutations and token transfers.
+<p align="center">
+  <img src="./screenshots/ss_test_output.png" alt="Smart Contract Test Output" width="85%">
+</p>
+
+### 9. CI/CD Integration (GitHub Actions Workflow)
+Automatic builds, test suite executions, and Flutter static analysis checks.
+<p align="center">
+  <img src="./screenshots/ss_cicd_pipeline.png" alt="CI/CD Pipeline Running Status" width="85%">
 </p>
 
 ---
