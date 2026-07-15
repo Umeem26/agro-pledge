@@ -60,6 +60,38 @@ A fully functional mobile client built using **Flutter** and **Dart** for premiu
 *   **Milestone-Based Escrow Tracker**: Visualizes the locked/unlocked state of the 50% Upfront working capital and 50% post-harvest settlement milestones.
 *   **Investor & Farmer Dashboards**: Separated dashboards displaying live blockchain logs, campaign progress bars, and pledge/milestone claim buttons.
 
+### 4. 🔗 Connect Wallet Feature (index.html — Inline Implementation)
+The **Connect Wallet** feature is implemented **directly inside [`index.html`](./index.html)** as an inline `<script type="module">` block, making the full wallet connection source code visible in a single file. The implementation includes:
+
+*   **Multi-Wallet Connection Kit** (`@creit.tech/stellar-wallets-kit`):
+    *   Initializes `StellarWalletsKit` with `WalletType.FREIGHTER` as the default wallet.
+    *   Calls `kit.openModal()` to display a wallet selection dialog supporting **Freighter, xBull, Albedo**, and other Stellar ecosystem wallets.
+    *   Retrieves the connected wallet's public address via `kit.getAddress()`.
+    *   Uses `kit.signTransaction()` to request the user's signature on Soroban pledge transactions.
+
+*   **Wallet Authentication Flow** (function: `connectMultiWallet()`):
+    1. Opens the StellarWalletsKit connection modal for wallet selection.
+    2. Retrieves the authenticated public key (`address`) from the selected wallet.
+    3. Displays the truncated wallet address in the UI.
+    4. Fetches the wallet's native XLM balance from Horizon API (`server.loadAccount()`).
+    5. Enables the pledge input and submit button after successful connection.
+
+*   **Balance Retrieval** (function: `refreshWalletBalance()`):
+    *   Queries the Stellar Horizon server for the connected account's balances.
+    *   Filters for `asset_type === "native"` to display the XLM balance.
+
+*   **Transaction Signing & Submission** (function: `executePledge()`):
+    *   Builds a Soroban `TransactionBuilder` invoking the `pledge_funds` contract function.
+    *   Signs the transaction via `kit.signTransaction(tx.toXDR())`.
+    *   Submits the signed XDR payload to the Soroban RPC `sendTransaction` endpoint.
+    *   Polls `getTransaction` until `SUCCESS` or `FAILED` status is confirmed.
+
+*   **Error Handling** (function: `handleError()`):
+    *   **User Rejected**: Catches wallet signature declines (`user rejected`, `declined`).
+    *   **Insufficient Balance**: Intercepts `op_underfunded` and `tx_insufficient_balance` errors.
+    *   **Wallet Not Found**: Detects missing browser extensions (`not installed`, `no wallet`).
+
+
 ---
 
 ## 📸 Proof of Execution
