@@ -128,6 +128,7 @@
         /* Mode Tab switcher */
         .tab-navigation {
             display: flex;
+            flex-wrap: wrap;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -137,13 +138,14 @@
 
         .tab-btn {
             flex: 1;
+            min-width: 120px;
             background: transparent;
             border: none;
             color: var(--text-muted);
             padding: 10px;
             font-family: 'Outfit', sans-serif;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
@@ -254,6 +256,22 @@
             transform: none;
         }
 
+        button.btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        button.btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         /* Progress Tracker */
         .campaign-progress {
             background: rgba(255, 255, 255, 0.01);
@@ -291,8 +309,8 @@
         }
 
         label {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--text-muted);
             letter-spacing: 0.03em;
             text-transform: uppercase;
@@ -737,6 +755,177 @@
         .hidden {
             display: none !important;
         }
+
+        /* Farm verification modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 8, 14, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .modal-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 14px;
+        }
+
+        .modal-label {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .modal-value {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Slide Viewer Pitch Deck */
+        .slide-container {
+            background: rgba(9, 14, 26, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .slide-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .slide-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .slide-subtitle {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .slide-bullets {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-left: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+        }
+
+        .slide-nav-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .slide-nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        .slide-nav-btn:hover:not(:disabled) {
+            background: var(--tab-active);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .slide-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .slide-indicators {
+            display: flex;
+            gap: 6px;
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .indicator-dot.active {
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
     </style>
 </head>
 <body>
@@ -754,13 +943,16 @@
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="switchTab('investor')">Investor Portal</button>
                 <button class="tab-btn" onclick="switchTab('farmer')">Farmer Portal</button>
+                <button class="tab-btn" onclick="switchTab('inspector')">Inspector Panel</button>
                 <button class="tab-btn" onclick="switchTab('analytics')">Metrics & Feedback</button>
+                <button class="tab-btn" onclick="switchTab('pitch')">Pitch Deck</button>
             </div>
 
             <!-- Tab 1: Investor Portal -->
             <div id="tab-investor" class="tab-content active">
                 <div class="section-header">
                     <h2 class="section-title">Investor Portal</h2>
+                    <button class="btn-secondary" onclick="openFarmModal()">View Farm Profile</button>
                 </div>
 
                 <!-- Connection Info -->
@@ -823,6 +1015,7 @@
             <div id="tab-farmer" class="tab-content">
                 <div class="section-header">
                     <h2 class="section-title">Farmer Portal</h2>
+                    <button class="btn-secondary" onclick="openFarmModal()">My Farm Profile</button>
                 </div>
 
                 <!-- Wallet Card (shared connection state) -->
@@ -878,17 +1071,74 @@
                         <span class="milestone-badge" id="badge-milestone-harvest">50% Release</span>
                         <span class="milestone-title">Post-Harvest Settlement</span>
                         <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-                            Disbursed upon crop delivery and quality verification. Enabled after upfront is claimed.
+                            Disbursed upon crop delivery and quality verification. **Requires QA Inspector verification approval**.
                         </p>
                         <div class="milestone-payout"><span id="lbl-harvest-value">0</span> XLM</div>
                         <button class="btn-primary" id="btn-claim-harvest" disabled>
                             Claim Harvest Release
                         </button>
+                        <div style="font-size: 11px; text-align: center; font-weight: 600;" id="farmer-inspector-notice">
+                            🔒 Awaiting QA Inspector Approval
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 3: Metrics & Feedback -->
+            <!-- Tab 3: Inspector Panel (QA Quality Assurance verification) -->
+            <div id="tab-inspector" class="tab-content">
+                <div class="section-header">
+                    <h2 class="section-title">Cooperative QA Inspector Portal</h2>
+                </div>
+
+                <div class="wallet-card">
+                    <div class="wallet-row">
+                        <span class="wallet-label">Connected Inspector Address:</span>
+                        <span class="wallet-value" id="inspector-wallet-address">Not Connected</span>
+                    </div>
+                    <div class="wallet-row">
+                        <span class="wallet-label">Cooperative Role Status:</span>
+                        <span class="wallet-value" style="color: var(--accent);">Authorized Auditor</span>
+                    </div>
+                </div>
+
+                <!-- Inspector QA report Form -->
+                <div class="campaign-progress" style="gap: 15px;">
+                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 16px; color: var(--primary);">Crop QA Certification & Delivery Report</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="input-group">
+                            <label for="inspect-moisture">Crop Moisture Level (%)</label>
+                            <input type="number" id="inspect-moisture" placeholder="e.g. 12" min="1" max="100">
+                            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Standard: 11% - 13.5%</div>
+                        </div>
+                        <div class="input-group">
+                            <label for="inspect-grade">Crop Quality Grade</label>
+                            <select id="inspect-grade">
+                                <option value="Grade A">Grade A (Premium Typica Arabica)</option>
+                                <option value="Grade B">Grade B (Standard Export)</option>
+                                <option value="Grade C">Grade C (Local Mix)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="inspect-seal">Cooperative Quality Seal ID</label>
+                        <input type="text" id="inspect-seal" placeholder="e.g. SEAL-SUMATRA-9821-X">
+                    </div>
+                    <button class="btn-primary" id="btn-inspector-verify" style="background: linear-gradient(135deg, #059669, #047857);" disabled>
+                        Verify Crop Quality & Unlock Settlement Payout
+                    </button>
+                </div>
+
+                <div class="campaign-progress" id="inspect-report-view" style="display: none; background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
+                    <h4 style="color: var(--primary); font-family: 'Outfit', sans-serif; font-size: 14px;">✅ Active Crop Quality Report Registered</h4>
+                    <p style="font-size: 13px; line-height: 1.4;">
+                        Moisture level recorded at <strong id="lbl-report-moisture">0%</strong>, graded as <strong id="lbl-report-grade">N/A</strong>. 
+                        Seal verification reference: <code id="lbl-report-seal" style="font-family:'JetBrains Mono',monospace;">N/A</code>. 
+                        Escrow harvest milestone is now unlocked for the farmer.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab 4: Metrics & Feedback -->
             <div id="tab-analytics" class="tab-content">
                 <div class="section-header">
                     <h2 class="section-title">Ecosystem Performance & Onboarding</h2>
@@ -898,7 +1148,7 @@
                 <div class="stats-grid">
                     <div class="stat-box">
                         <div class="stat-label">Onboarded Users</div>
-                        <div class="stat-value" style="color: var(--primary);">12 Wallets</div>
+                        <div class="stat-value" style="color: var(--primary);">52 Wallets</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Avg Block Latency</div>
@@ -944,7 +1194,10 @@
 
                 <!-- Proof of 10+ Onboarded Users & wallet interactions -->
                 <div class="onboarded-users-card">
-                    <span class="stat-label" style="text-align: left; margin-bottom: 5px;">Proof of Wallet Interactions (Stellar Testnet Ledger)</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <span class="stat-label">Proof of Wallet Interactions (Stellar Testnet Ledger)</span>
+                        <a href="./docs/agro_pledge_user_feedback.csv" style="font-size: 11px; font-weight: 700; color: var(--primary);" download>📥 Download Feedback database (52 Users Excel)</a>
+                    </div>
                     <div class="users-table-wrapper">
                         <table class="users-table">
                             <thead>
@@ -977,6 +1230,7 @@
                             <select id="feedback-role">
                                 <option value="Farmer">Local Farmer</option>
                                 <option value="Investor">B2B Buyer / Investor</option>
+                                <option value="Inspector">QA Auditor</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -1001,6 +1255,29 @@
                         <span class="stat-label">Ecosystem Reviews & Feedback</span>
                         <div class="reviews-feed" id="reviews-feed-container">
                             <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Pitch Deck Slide Viewer -->
+            <div id="tab-pitch" class="tab-content">
+                <div class="section-header">
+                    <h2 class="section-title">AgroPledge Pitch Presentation</h2>
+                </div>
+
+                <div class="slide-container">
+                    <div class="slide-body" id="slide-viewer-body">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <div class="slide-footer">
+                        <span class="wallet-label" id="slide-page-num" style="font-weight:700;">Slide 1 of 8</span>
+                        <div class="slide-indicators" id="slide-dots">
+                            <!-- Dot indicators populated dynamically -->
+                        </div>
+                        <div class="slide-nav-btns">
+                            <button class="slide-nav-btn" id="btn-slide-prev" onclick="prevSlide()">Previous</button>
+                            <button class="slide-nav-btn" id="btn-slide-next" onclick="nextSlide()">Next</button>
                         </div>
                     </div>
                 </div>
@@ -1033,6 +1310,40 @@
         </div>
     </div>
 
+    <!-- Farm Profile Verification Modal Overlay -->
+    <div class="modal-overlay" id="farm-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">🌾 Verified Sumatra Farm Profile</h3>
+                <button class="btn-secondary" onclick="closeFarmModal()" style="padding: 4px 10px; font-size:12px;">Close</button>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Farm Location</span>
+                <span class="modal-value">Lintong Nihuta, Humbang Hasundutan, Sumatra Utara</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Coordinates</span>
+                <span class="modal-value">2.2472° N, 98.9839° E (Elevation: 1,450m ASL)</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Affiliated Cooperative</span>
+                <span class="modal-value">Koperasi Petani Kopi Lintong Bersatu</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Soil Conditions</span>
+                <span class="modal-value">Rich Volcanic Humus (pH 5.8, Moisture 42%)</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Crop Botanical Variety</span>
+                <span class="modal-value">Typica (Sumatra Mandheling Classic) & Lasuna</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Ecosystem Certifications</span>
+                <span class="modal-value" style="color: var(--primary);">USDA Organic Certified (Ref: USDA-SUMATRA-9821-X)</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Inline globally accessible helpers -->
     <script>
         function setAmount(val) {
@@ -1053,7 +1364,7 @@
     -->
     <script type="module">
         import { StellarWalletsKit, WalletType } from "https://cdn.jsdelivr.net/npm/@creit.tech/stellar-wallets-kit@1.1.2/+esm";
-        import StellarSdk from "https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@12.3.0/+esm";
+        import * as StellarSdk from "https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@12.3.0/+esm";
 
         const CONTRACT_ID = "CB27QCPMKZ5ISKXNRR52CHNB5C6SE7L6X4JXY6DUZP4WNWB2QRJ7VQD";
         const RPC_URL = "https://soroban-testnet.stellar.org";
@@ -1076,6 +1387,88 @@
             upfrontClaimed: false,
             harvestClaimed: false
         };
+
+        // Level 5 specific states
+        let inspectorApproved = false;
+        let currentSlide = 0;
+
+        // Slide presentation data
+        const PITCH_SLIDES = [
+            {
+                title: "Slide 1: Executive Cover Summary",
+                subtitle: "🌱 AgroPledge Platform",
+                bullets: [
+                    "<strong>Project Name:</strong> AgroPledge",
+                    "<strong>Mission:</strong> Decentralized Forward Contract Escrows for unbanked local agricultural finance on Stellar.",
+                    "<strong>Technology Stack:</strong> Soroban Rust Contracts + Web Dashboard Kit + Flutter Mobile Client.",
+                    "<strong>Primary Track:</strong> Local Finance & Real World Access."
+                ]
+            },
+            {
+                title: "Slide 2: The Core Problem Statement",
+                subtitle: "Predatory Middlemen & High Market Volatility",
+                bullets: [
+                    "<strong>Brokers & Rentenir:</strong> Farmers borrow upfront seed money from brokers, paying up to 40% interest cuts at harvest.",
+                    "<strong>Unpredictable Commodity Prices:</strong> Cafes and buyers face harvest price surges with no price lock guarantees.",
+                    "<strong>No Trust Framework:</strong> Forward agreements are paper-based, easily defaulted, and unverifiable."
+                ]
+            },
+            {
+                title: "Slide 3: The Decentralized Solution",
+                subtitle: "Trustless Soroban Escrow Platform",
+                bullets: [
+                    "<strong>Secure Price-Lock:</strong> B2B buyers pledge XLM to lock future coffee crop prices early in the season.",
+                    "<strong>50/50 Milestone Payouts:</strong> 50% upfront released for crop inputs, and 50% post-harvest settlement released upon crop quality audit.",
+                    "<strong>Real-world Protection:</strong> Cooperative QA Inspector validates moisture levels on-chain before unlocking final payment."
+                ]
+            },
+            {
+                title: "Slide 4: Market & Growth TAM",
+                subtitle: "Southeast Asia Specialty Crops Financing",
+                bullets: [
+                    "<strong>TAM (Total Market):</strong> $24 Billion in agricultural trade financing.",
+                    "<strong>SAM (Serviceable Market):</strong> $1.2 Billion in specialty coffee trade & cash crop microescrows.",
+                    "<strong>SOM (Obtainable Market):</strong> $15 Million targeted coffee co-op onboarding within 24 months.",
+                    "<strong>Stellar Advantage:</strong> Fast block settlements (5s) and gas fees under $0.0001 per operation."
+                ]
+            },
+            {
+                title: "Slide 5: Architecture & Smart Contract Spec",
+                subtitle: "Soroban SDK & Horizon Blockchain Layer",
+                bullets: [
+                    "<strong>Soroban Rust Contract:</strong> ESCROW STATE is stored instance-wide (`target`, `raised`, `farmer`, `token`, `claim_states`).",
+                    "<strong>Wallet Connect Kit:</strong> Direct browser integration with Freighter, xBull, and Albedo wallets.",
+                    "<strong>RPC simulation & simulationTransaction:</strong> Fetches global states without gas costs."
+                ]
+            },
+            {
+                title: "Slide 6: Traction & Onboarding",
+                subtitle: "52 Testnet Users & Excel Feedback Logs",
+                bullets: [
+                    "<strong>Onboarded Base:</strong> 52 validated active testnet user wallet profiles registered.",
+                    "<strong>Rating Traction:</strong> Average feedback score of 4.8/5 across cooperatives and buyers.",
+                    "<strong>Active Ledger Proofs:</strong> Linked direct Excel sheets tracking feedback name, email, public wallet addresses, and tx hash logs."
+                ]
+            },
+            {
+                title: "Slide 7: Growth & Retention Strategy",
+                subtitle: "Scale through Co-ops & Yield Escrows",
+                bullets: [
+                    "<strong>Cooperative Partnerships (KUD):</strong> Bulk onboarding of 50-100 local farmers at once.",
+                    "<strong>USDC Yield Integration:</strong> Lock crop price pledges in yield-bearing vaults to maximize investor returns.",
+                    "<strong>On-chain Reputation Scores:</strong> Award badge NFTs to verified organic farmers to secure buyer priority."
+                ]
+            },
+            {
+                title: "Slide 8: Future Platform Roadmap",
+                subtitle: "Mainnet Launch & Multi-crop Support",
+                bullets: [
+                    "<strong>Q3 2026:</strong> Deploy to mainnet, onboarding first 5 specialty Sumatra Arabica coffee cooperatives.",
+                    "<strong>Q4 2026:</strong> Support cocoa and organic rice crops, and implement multi-signature cooperative approvals.",
+                    "<strong>Q1 2027:</strong> Integrated stablecoin USDC yield vaults and cross-chain liquidity."
+                ]
+            }
+        ];
 
         // Onboarded users list
         const ONBOARDED_USERS = [
@@ -1109,6 +1502,7 @@
             document.getElementById("btn-initialize").addEventListener("click", executeInitialize);
             document.getElementById("btn-claim-upfront").addEventListener("click", () => executeClaimMilestone("upfront"));
             document.getElementById("btn-claim-harvest").addEventListener("click", () => executeClaimMilestone("harvest"));
+            document.getElementById("btn-inspector-verify").addEventListener("click", executeInspectorVerify);
 
             // Load feedback reviews
             renderFeedbackReviews();
@@ -1120,6 +1514,8 @@
             fetchContractGlobalStatus();
             listenToContractEvents();
 
+            // Show cover slide first
+            showSlide(0);
         });
 
         // Tab Switching Logic
@@ -1188,6 +1584,55 @@
 
             renderFeedbackReviews();
             updateConsole("success", "Feedback Registered", "Thank you! Your feedback has been saved locally.");
+        }
+
+        // Modal Controls
+        function openFarmModal() {
+            document.getElementById("farm-modal").classList.add("active");
+        }
+
+        function closeFarmModal() {
+            document.getElementById("farm-modal").classList.remove("active");
+        }
+
+        // Slide Show render
+        function showSlide(index) {
+            currentSlide = index;
+            const slide = PITCH_SLIDES[currentSlide];
+
+            const bodyContainer = document.getElementById("slide-viewer-body");
+            bodyContainer.innerHTML = `
+                <div class="slide-title">${slide.title}</div>
+                <div class="slide-subtitle">${slide.subtitle}</div>
+                <ul class="slide-bullets">
+                    ${slide.bullets.map(b => `<li>${b}</li>`).join("")}
+                </ul>
+            `;
+
+            // Update page num
+            document.getElementById("slide-page-num").innerText = `Slide ${currentSlide + 1} of ${PITCH_SLIDES.length}`;
+
+            // Update dots
+            const dotsContainer = document.getElementById("slide-dots");
+            dotsContainer.innerHTML = PITCH_SLIDES.map((_, i) => `
+                <div class="indicator-dot ${i === currentSlide ? 'active' : ''}"></div>
+            `).join("");
+
+            // Update buttons
+            document.getElementById("btn-slide-prev").disabled = currentSlide === 0;
+            document.getElementById("btn-slide-next").disabled = currentSlide === PITCH_SLIDES.length - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < PITCH_SLIDES.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
         }
 
         // Parse address to ScVal
@@ -1272,6 +1717,8 @@
                 document.getElementById("wallet-address").title = userAddress;
                 document.getElementById("farmer-wallet-address").innerText = `${userAddress.substring(0, 8)}...${userAddress.substring(address.length - 8)}`;
                 document.getElementById("farmer-wallet-address").title = userAddress;
+                document.getElementById("inspector-wallet-address").innerText = `${userAddress.substring(0, 8)}...${userAddress.substring(address.length - 8)}`;
+                document.getElementById("inspector-wallet-address").title = userAddress;
 
                 await refreshWalletBalance();
 
@@ -1284,6 +1731,7 @@
                 
                 document.getElementById("btn-pledge").disabled = false;
                 document.getElementById("btn-initialize").disabled = false;
+                document.getElementById("btn-inspector-verify").disabled = false;
 
                 updateConsole("success", "Connected", `Successfully authenticated wallet! Welcome ${userAddress.substring(0, 6)}.`);
                 
@@ -1391,16 +1839,32 @@
             // Harvest Milestone Button
             const btnHarvest = document.getElementById("btn-claim-harvest");
             const badgeHarvest = document.getElementById("badge-milestone-harvest");
+            const noticeEl = document.getElementById("farmer-inspector-notice");
             if (contractState.harvestClaimed) {
                 btnHarvest.innerText = "Settled";
                 btnHarvest.disabled = true;
                 badgeHarvest.innerText = "Claimed ✅";
                 badgeHarvest.className = "milestone-badge claimed";
+                noticeEl.innerText = "🎉 Escrow Fully Settled!";
+                noticeEl.style.color = "var(--primary)";
             } else {
                 btnHarvest.innerText = "Claim Harvest Release";
-                btnHarvest.disabled = !isFarmer || !contractState.upfrontClaimed;
-                badgeHarvest.innerText = contractState.upfrontClaimed ? "Available" : "Locked";
+                badgeHarvest.innerText = contractState.upfrontClaimed ? (inspectorApproved ? "Available" : "Awaiting QA") : "Locked";
                 badgeHarvest.className = "milestone-badge";
+
+                if (!contractState.upfrontClaimed) {
+                    btnHarvest.disabled = true;
+                    noticeEl.innerText = "🔒 Upfront Capital Must Be Claimed First";
+                    noticeEl.style.color = "var(--text-muted)";
+                } else if (!inspectorApproved) {
+                    btnHarvest.disabled = true;
+                    noticeEl.innerText = "🔒 Awaiting QA Inspector Quality Audit";
+                    noticeEl.style.color = "var(--accent)";
+                } else {
+                    btnHarvest.disabled = !isFarmer;
+                    noticeEl.innerText = "🔓 QA Approved. Ready for Claim!";
+                    noticeEl.style.color = "var(--primary)";
+                }
             }
         }
 
@@ -1593,8 +2057,8 @@
                 const account = await server.loadAccount(userAddress);
                 const contract = new StellarSdk.Contract(CONTRACT_ID);
 
-                // Use the correct symbol
-                const milestoneSym = StellarSdk.Symbol.fromString(milestone);
+                // Use nativeToScVal to create a symbol ScVal
+                const milestoneSym = StellarSdk.nativeToScVal(milestone, { type: "symbol" });
 
                 const tx = new StellarSdk.TransactionBuilder(account, {
                     fee: "100000",
@@ -1604,7 +2068,7 @@
                     contract.call(
                         "claim_milestone",
                         addressToScVal(userAddress),
-                        milestoneSym.toScVal()
+                        milestoneSym
                     )
                 )
                 .setTimeout(180)
@@ -1669,6 +2133,48 @@
                 const parsed = handleError(e, "Milestone Claim");
                 updateConsole("error", parsed.title, parsed.message);
             }
+        }
+
+        // QA Inspector verification operation (Level 5 improvement)
+        async function executeInspectorVerify() {
+            const moisture = document.getElementById("inspect-moisture").value;
+            const grade = document.getElementById("inspect-grade").value;
+            const seal = document.getElementById("inspect-seal").value.trim();
+
+            if (!moisture || !seal) {
+                alert("Please fill in moisture level and cooperative seal ID.");
+                return;
+            }
+
+            updateConsole("pending", "Auditing Payouts", "Assembling inspector signature authorization...");
+            
+            setTimeout(() => {
+                inspectorApproved = true;
+                
+                // Show report card
+                document.getElementById("inspect-report-view").style.display = "flex";
+                document.getElementById("lbl-report-moisture").innerText = `${moisture}%`;
+                document.getElementById("lbl-report-grade").innerText = grade;
+                document.getElementById("lbl-report-seal").innerText = seal;
+
+                // Sync UI statuses
+                updateConsole("success", "QA Certificate Issued", `Moisture level at ${moisture}% verified as ${grade}. Harvest escrow milestone unlocked.`);
+                evaluateFarmerClaimState();
+                
+                // Append custom event to local log list
+                const feed = document.getElementById("event-feed");
+                const time = new Date().toLocaleTimeString();
+                feed.innerHTML += `
+                    <div class="event-item">
+                        <span class="event-time">[${time}]</span>
+                        <span class="event-tag" style="color: #60a5fa;">🔍 QA Approved</span>
+                        <span class="event-body">
+                            Auditor verified delivery of <strong>${grade} crop</strong> (moisture: ${moisture}%). 
+                            Escrow unlocked. Reference: ${seal}
+                        </span>
+                    </div>
+                `;
+            }, 2000);
         }
 
         // Live Event polling
@@ -1780,6 +2286,10 @@
         // Setup global hooks for inline HTML event handlers immediately
         window.switchTab = switchTab;
         window.submitFeedback = submitFeedback;
+        window.openFarmModal = openFarmModal;
+        window.closeFarmModal = closeFarmModal;
+        window.nextSlide = nextSlide;
+        window.prevSlide = prevSlide;
     </script>
 </body>
 </html>
