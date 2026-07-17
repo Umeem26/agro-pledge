@@ -32,6 +32,5 @@ Thumbs.db
 /agro_pledge_mobile/pubspec.lock
 
 # Test and Documentation Folders
-/docs/
 **/test_snapshots/
 

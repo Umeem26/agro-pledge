@@ -11,6 +11,8 @@ pub struct PledgeState {
     pub token: Address,
     pub upfront_claimed: bool,
     pub harvest_claimed: bool,
+    pub inspector: Address,
+    pub harvest_approved: bool,
 }
 
 // Storage keys
@@ -25,8 +27,8 @@ pub struct AgroPledgeContract;
 
 #[contractimpl]
 impl AgroPledgeContract {
-    // 1. Initialize forward contract with token custodian and target goals
-    pub fn initialize(env: Env, token: Address, farmer: Address, target: i128) {
+    // 1. Initialize forward contract with token custodian, farmer, inspector, and target goals
+    pub fn initialize(env: Env, token: Address, farmer: Address, inspector: Address, target: i128) {
         if env.storage().instance().has(&STATE) {
             panic!("Project already initialized!");
         }
@@ -38,6 +40,8 @@ impl AgroPledgeContract {
             token,
             upfront_claimed: false,
             harvest_claimed: false,
+            inspector,
+            harvest_approved: false,
         };
         env.storage().instance().set(&STATE, &state);
     }
@@ -94,6 +98,9 @@ impl AgroPledgeContract {
             if !state.upfront_claimed {
                 panic!("Cannot claim harvest milestone before upfront milestone is claimed!");
             }
+            if !state.harvest_approved {
+                panic!("Cannot claim harvest milestone before inspector approvals are recorded!");
+            }
             if state.harvest_claimed {
                 panic!("Harvest milestone disbursement has already been claimed!");
             }
@@ -113,6 +120,27 @@ impl AgroPledgeContract {
         env.events().publish((CLAIM_EVENT, farmer), payout);
 
         payout
+    }
+
+    // 4. Approve harvest quality check (Cooperative QA Inspector signature)
+    pub fn approve_harvest(env: Env, inspector: Address) {
+        inspector.require_auth();
+
+        let mut state: PledgeState = env.storage().instance().get(&STATE).expect("Contract not initialized.");
+
+        if inspector != state.inspector {
+            panic!("Only the registered inspector can approve harvest release!");
+        }
+
+        if state.harvest_approved {
+            panic!("Harvest release has already been approved!");
+        }
+
+        state.harvest_approved = true;
+        env.storage().instance().set(&STATE, &state);
+
+        // Emit on-chain approval event
+        env.events().publish((symbol_short!("approved"), inspector), 1);
     }
 
     // 4. Get contract status (read-only)

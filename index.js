@@ -1,17 +1,37 @@
 import { StellarWalletsKit, WalletType } from "https://cdn.jsdelivr.net/npm/@creit.tech/stellar-wallets-kit@1.1.2/+esm";
 import * as StellarSdk from "https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@12.3.0/+esm";
 
-// Contract and Network configuration
-const CONTRACT_ID = "CB27QCPMKZ5ISKXNRR52CHNB5C6SE7L6X4JXY6DUZP4WNWB2QRJ7VQD";
-const RPC_URL = "https://soroban-testnet.stellar.org";
-const HORIZON_URL = "https://horizon-testnet.stellar.org";
+// Dynamic Network & Contract configuration
+const NETWORKS = {
+    TESTNET: {
+        passphrase: StellarSdk.Networks.TESTNET,
+        rpc: "https://soroban-testnet.stellar.org",
+        horizon: "https://horizon-testnet.stellar.org",
+        contract: "CB27QCPMKZ5ISKXNRR52CHNB5C6SE7L6X4JXY6DUZP4WNWB2QRJ7VQD",
+        sac: "CDLZFC3SYJYDZT7KKA7QDV4N2W747355B423OW523JHPP56IFQ55N3TX"
+    },
+    MAINNET: {
+        passphrase: StellarSdk.Networks.PUBLIC,
+        rpc: "https://soroban-rpc.stellar.org",
+        horizon: "https://horizon.stellar.org",
+        contract: "CC3D4EEXXXXXXXXXXXXXXFARMERXXXXXXXXXXXXXXXXXXINSPECT", // User can override
+        sac: "CAS3J7XXXXXXXXXXXXXXNATIVE_SACXXXXXXXXXXXXXXXXXXXXXX"
+    }
+};
+
+let currentNetwork = "TESTNET";
+let rpcUrl = NETWORKS.TESTNET.rpc;
+let horizonUrl = NETWORKS.TESTNET.horizon;
+let contractId = NETWORKS.TESTNET.contract;
+let nativeTokenSac = NETWORKS.TESTNET.sac;
+let passphrase = NETWORKS.TESTNET.passphrase;
 
 // Initialize kit modal configuration
-const kit = new StellarWalletsKit({
+let kit = new StellarWalletsKit({
     network: "TESTNET",
     selectedWalletId: WalletType.FREIGHTER
 });
-const server = new StellarSdk.Horizon.Server(HORIZON_URL);
+let server = new StellarSdk.Horizon.Server(horizonUrl);
 
 let userAddress = "";
 let lastPolledLedger = 0;
@@ -21,11 +41,13 @@ let contractState = {
     farmer: "",
     token: "",
     upfrontClaimed: false,
-    harvestClaimed: false
+    harvestClaimed: false,
+    inspector: "",
+    harvestApproved: false
 };
 
-// Level 5 specific states
-let inspectorApproved = false;
+// Level 6 specific states
+let inspectorApproved = false; // Legacy fallback
 let currentSlide = 0;
 
 // Slide presentation data
@@ -140,6 +162,35 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-claim-harvest").addEventListener("click", () => executeClaimMilestone("harvest"));
     document.getElementById("btn-inspector-verify").addEventListener("click", executeInspectorVerify);
 
+    // Network selector change handler
+    const netSelector = document.getElementById("network-selector");
+    if (netSelector) {
+        netSelector.addEventListener("change", (e) => {
+            const net = e.target.value;
+            currentNetwork = net;
+            rpcUrl = NETWORKS[net].rpc;
+            horizonUrl = NETWORKS[net].horizon;
+            contractId = NETWORKS[net].contract;
+            nativeTokenSac = NETWORKS[net].sac;
+            passphrase = NETWORKS[net].passphrase;
+
+            server = new StellarSdk.Horizon.Server(horizonUrl);
+            kit = new StellarWalletsKit({
+                network: net,
+                selectedWalletId: WalletType.FREIGHTER
+            });
+
+            document.getElementById("lbl-contract-id").innerText = `${contractId.substring(0, 8)}...${contractId.substring(contractId.length - 8)}`;
+            document.getElementById("lbl-contract-id").title = contractId;
+
+            if (userAddress) {
+                refreshWalletBalance();
+            }
+            fetchContractGlobalStatus();
+            updateConsole("success", "Network Configuration Switched", `Target network changed to Stellar ${net}.`);
+        });
+    }
+
     // Seed feedback and user logs
     renderFeedbackReviews();
     renderOnboardedUsers();
@@ -175,7 +226,7 @@ function renderOnboardedUsers() {
             <td><span class="review-role" style="background: ${u.role === 'Farmer' ? 'rgba(16,185,129,0.1)' : 'rgba(96,165,250,0.1)'}; color: ${u.role === 'Farmer' ? 'var(--primary)' : '#60a5fa'};">${u.role}</span></td>
             <td><span style="font-weight:600; color: #ffffff;">${u.action}</span></td>
             <td><span class="wallet-value" style="color:var(--primary); font-size:12px;">${u.amount}</span></td>
-            <td><a class="event-hash" href="https://stellar.expert/explorer/testnet/tx/${u.hash}" target="_blank">${u.hash.substring(0, 10)}...</a></td>
+            <td><a class="event-hash" href="${currentNetwork === 'TESTNET' ? 'https://stellar.expert/explorer/testnet/tx/' : 'https://stellar.expert/explorer/public/tx/'}${u.hash}" target="_blank">${u.hash.substring(0, 10)}...</a></td>
         </tr>
     `).join("");
 }
@@ -272,6 +323,7 @@ function nextSlide() {
     }
 }
 
+// prevSlide
 function prevSlide() {
     if (currentSlide > 0) {
         showSlide(currentSlide - 1);
@@ -287,6 +339,7 @@ function addressToScVal(addressStr) {
     }
 }
 
+// Parse BigInt to i128 ScVal
 function bigIntToI128ScVal(value) {
     const big = BigInt(value);
     return StellarSdk.nativeToScVal(big, { type: "i128" });
@@ -314,7 +367,7 @@ function updateConsole(type, title, desc, txHash = null) {
             badge.innerText = "SUCCESS";
             if (txHash) {
                 linkEl.style.display = "inline-block";
-                linkEl.href = `https://stellar.expert/explorer/testnet/tx/${txHash}`;
+                linkEl.href = `${currentNetwork === 'TESTNET' ? 'https://stellar.expert/explorer/testnet/tx/' : 'https://stellar.expert/explorer/public/tx/'}${txHash}`;
             }
             break;
         case "error":
@@ -405,16 +458,16 @@ async function refreshWalletBalance() {
 async function fetchContractGlobalStatus() {
     try {
         const dummySource = new StellarSdk.Account("GBGPPHGK3Z7QCPMKZ5ISKXNRR52CHNB5C6SE7L6X4JXY6DUZP4WNWB2QRJ", "0");
-        const contract = new StellarSdk.Contract(CONTRACT_ID);
+        const contract = new StellarSdk.Contract(contractId);
         const tx = new StellarSdk.TransactionBuilder(dummySource, {
             fee: "100",
-            networkPassphrase: StellarSdk.Networks.TESTNET
+            networkPassphrase: passphrase
         })
         .addOperation(contract.call("get_status"))
         .setTimeout(30)
         .build();
 
-        const response = await fetch(RPC_URL, {
+        const response = await fetch(rpcUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -436,6 +489,8 @@ async function fetchContractGlobalStatus() {
             contractState.token = status.token || "";
             contractState.upfrontClaimed = status.upfront_claimed || false;
             contractState.harvestClaimed = status.harvest_claimed || false;
+            contractState.inspector = status.inspector || "";
+            contractState.harvestApproved = status.harvest_approved || false;
 
             // Sync stats in UI
             document.getElementById("target-amount").innerText = contractState.targetAmount.toLocaleString();
@@ -497,14 +552,14 @@ function evaluateFarmerClaimState() {
         noticeEl.style.color = "var(--primary)";
     } else {
         btnHarvest.innerText = "Claim Harvest Release";
-        badgeHarvest.innerText = contractState.upfrontClaimed ? (inspectorApproved ? "Available" : "Awaiting QA") : "Locked";
+        badgeHarvest.innerText = contractState.upfrontClaimed ? (contractState.harvestApproved ? "Available" : "Awaiting QA") : "Locked";
         badgeHarvest.className = "milestone-badge";
 
         if (!contractState.upfrontClaimed) {
             btnHarvest.disabled = true;
             noticeEl.innerText = "🔒 Upfront Capital Must Be Claimed First";
             noticeEl.style.color = "var(--text-muted)";
-        } else if (!inspectorApproved) {
+        } else if (!contractState.harvestApproved) {
             btnHarvest.disabled = true;
             noticeEl.innerText = "🔒 Awaiting QA Inspector Quality Audit";
             noticeEl.style.color = "var(--accent)";
@@ -523,11 +578,11 @@ async function executePledge(amount) {
         if (!userAddress) throw new Error("Wallet not connected");
 
         const account = await server.loadAccount(userAddress);
-        const contract = new StellarSdk.Contract(CONTRACT_ID);
+        const contract = new StellarSdk.Contract(contractId);
         
         const tx = new StellarSdk.TransactionBuilder(account, {
             fee: "100000",
-            networkPassphrase: StellarSdk.Networks.TESTNET
+            networkPassphrase: passphrase
         })
         .addOperation(
             contract.call(
@@ -543,7 +598,7 @@ async function executePledge(amount) {
         const signedXdr = await kit.signTransaction(tx.toXDR());
 
         updateConsole("pending", "Broadcasting", "Broadcasting payload to Soroban network...");
-        const sendRes = await fetch(RPC_URL, {
+        const sendRes = await fetch(rpcUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -570,7 +625,7 @@ async function executePledge(amount) {
             await new Promise(r => setTimeout(r, 2000));
             attempts++;
 
-            const pollRes = await fetch(RPC_URL, {
+            const pollRes = await fetch(rpcUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -608,28 +663,29 @@ async function executePledge(amount) {
 // Initialize Contract parameters
 async function executeInitialize() {
     const farmerAddr = document.getElementById("init-farmer-addr").value.trim();
+    const inspectorAddr = document.getElementById("init-inspector-addr").value.trim();
     const targetFunding = document.getElementById("init-target").value;
 
-    if (!farmerAddr || !targetFunding) {
-        alert("Please fill in the Farmer address and Target Funding goal.");
+    if (!farmerAddr || !inspectorAddr || !targetFunding) {
+        alert("Please fill in the Farmer address, Inspector address, and Target Funding goal.");
         return;
     }
 
     updateConsole("pending", "Initializing", "Preparing initialize operation on contract...");
     try {
         const account = await server.loadAccount(userAddress);
-        const contract = new StellarSdk.Contract(CONTRACT_ID);
-        const NATIVE_TOKEN_SAC = "CDLZFC3SYJYDZT7KKA7QDV4N2W747355B423OW523JHPP56IFQ55N3TX";
+        const contract = new StellarSdk.Contract(contractId);
 
         const tx = new StellarSdk.TransactionBuilder(account, {
             fee: "100000",
-            networkPassphrase: StellarSdk.Networks.TESTNET
+            networkPassphrase: passphrase
         })
         .addOperation(
             contract.call(
                 "initialize",
-                addressToScVal(NATIVE_TOKEN_SAC),
+                addressToScVal(nativeTokenSac),
                 addressToScVal(farmerAddr),
+                addressToScVal(inspectorAddr),
                 bigIntToI128ScVal(targetFunding)
             )
         )
@@ -640,7 +696,7 @@ async function executeInitialize() {
         const signedXdr = await kit.signTransaction(tx.toXDR());
 
         updateConsole("pending", "Broadcasting", "Sending initial state transaction to Soroban...");
-        const sendRes = await fetch(RPC_URL, {
+        const sendRes = await fetch(rpcUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -664,7 +720,7 @@ async function executeInitialize() {
         while (status === "PENDING" && attempts < 30) {
             await new Promise(r => setTimeout(r, 2000));
             attempts++;
-            const pollRes = await fetch(RPC_URL, {
+            const pollRes = await fetch(rpcUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -701,12 +757,12 @@ async function executeClaimMilestone(milestone) {
     updateConsole("pending", "Milestone Claim", `Building ${milestone} disbursement claim transaction...`);
     try {
         const account = await server.loadAccount(userAddress);
-        const contract = new StellarSdk.Contract(CONTRACT_ID);
+        const contract = new StellarSdk.Contract(contractId);
         const milestoneSym = StellarSdk.nativeToScVal(milestone, { type: "symbol" });
 
         const tx = new StellarSdk.TransactionBuilder(account, {
             fee: "100000",
-            networkPassphrase: StellarSdk.Networks.TESTNET
+            networkPassphrase: passphrase
         })
         .addOperation(
             contract.call(
@@ -722,7 +778,7 @@ async function executeClaimMilestone(milestone) {
         const signedXdr = await kit.signTransaction(tx.toXDR());
 
         updateConsole("pending", "Executing Release", "Verifying farmer authorization and releasing payout from escrow...");
-        const sendRes = await fetch(RPC_URL, {
+        const sendRes = await fetch(rpcUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -746,7 +802,7 @@ async function executeClaimMilestone(milestone) {
         while (status === "PENDING" && attempts < 30) {
             await new Promise(r => setTimeout(r, 2000));
             attempts++;
-            const pollRes = await fetch(RPC_URL, {
+            const pollRes = await fetch(rpcUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -779,7 +835,7 @@ async function executeClaimMilestone(milestone) {
     }
 }
 
-// QA Inspector approval operation
+// QA Inspector approval operation (actual on-chain approve_harvest)
 async function executeInspectorVerify() {
     const moisture = document.getElementById("inspect-moisture").value;
     const grade = document.getElementById("inspect-grade").value;
@@ -790,50 +846,127 @@ async function executeInspectorVerify() {
         return;
     }
 
-    updateConsole("pending", "Auditing Payouts", "Assembling inspector signature authorization...");
-    
-    setTimeout(() => {
-        inspectorApproved = true;
-        
-        // Show report card in UI
-        const reportView = document.getElementById("inspect-report-view");
-        if (reportView) reportView.style.display = "flex";
-        
-        const moistureLbl = document.getElementById("lbl-report-moisture");
-        const gradeLbl = document.getElementById("lbl-report-grade");
-        const sealLbl = document.getElementById("lbl-report-seal");
-        if (moistureLbl) moistureLbl.innerText = `${moisture}%`;
-        if (gradeLbl) gradeLbl.innerText = grade;
-        if (sealLbl) sealLbl.innerText = seal;
+    updateConsole("pending", "Auditing Payouts", "Assembling inspector approval transaction on-chain...");
+    try {
+        if (!userAddress) throw new Error("Wallet not connected");
 
-        updateConsole("success", "QA Certificate Issued", `Moisture level at ${moisture}% verified as ${grade}. Harvest escrow milestone unlocked.`);
-        evaluateFarmerClaimState();
-        
-        // Log custom event
-        const feed = document.getElementById("event-feed");
-        if (feed) {
-            const time = new Date().toLocaleTimeString();
-            feed.innerHTML += `
-                <div class="event-item">
-                    <span class="event-time">[${time}]</span>
-                    <span class="event-tag" style="color: #60a5fa;">🔍 QA Approved</span>
-                    <span class="event-body">
-                        Auditor verified delivery of <strong>${grade} crop</strong> (moisture: ${moisture}%). 
-                        Escrow unlocked. Reference: ${seal}
-                    </span>
-                </div>
-            `;
-            feed.scrollTop = feed.scrollHeight;
+        const account = await server.loadAccount(userAddress);
+        const contract = new StellarSdk.Contract(contractId);
+
+        const tx = new StellarSdk.TransactionBuilder(account, {
+            fee: "100000",
+            networkPassphrase: passphrase
+        })
+        .addOperation(
+            contract.call(
+                "approve_harvest",
+                addressToScVal(userAddress)
+            )
+        )
+        .setTimeout(180)
+        .build();
+
+        updateConsole("pending", "Signing Approval", "Approve inspector QA audit signature in wallet...");
+        const signedXdr = await kit.signTransaction(tx.toXDR());
+
+        updateConsole("pending", "Broadcasting", "Broadcasting QA approval to Soroban network...");
+        const sendRes = await fetch(rpcUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                jsonrpc: "2.0",
+                id: Date.now(),
+                method: "sendTransaction",
+                params: { transaction: signedXdr }
+            })
+        });
+
+        const sendJson = await sendRes.json();
+        if (sendJson.error) throw new Error(sendJson.error.message);
+
+        const hash = sendJson.result.hash;
+        let status = sendJson.result.status;
+
+        updateConsole("pending", "Consensus", "Approval submitted. Waiting for transaction settlement...");
+        let attempts = 0;
+        let done = false;
+
+        while (status === "PENDING" && attempts < 30) {
+            await new Promise(r => setTimeout(r, 2000));
+            attempts++;
+
+            const pollRes = await fetch(rpcUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: Date.now(),
+                    method: "getTransaction",
+                    params: { hash }
+                })
+            });
+            const pollJson = await pollRes.json();
+            if (pollJson.result) {
+                status = pollJson.result.status;
+                if (status === "SUCCESS") {
+                    done = true;
+                    break;
+                } else if (status === "FAILED") {
+                    throw new Error("Contract execution failed on-chain.");
+                }
+            }
         }
-    }, 2000);
+
+        if (done) {
+            // Show report card in UI
+            const reportView = document.getElementById("inspect-report-view");
+            if (reportView) reportView.style.display = "flex";
+            
+            const moistureLbl = document.getElementById("lbl-report-moisture");
+            const gradeLbl = document.getElementById("lbl-report-grade");
+            const sealLbl = document.getElementById("lbl-report-seal");
+            if (moistureLbl) moistureLbl.innerText = `${moisture}%`;
+            if (gradeLbl) gradeLbl.innerText = grade;
+            if (sealLbl) sealLbl.innerText = seal;
+
+            updateConsole("success", "QA Certificate Issued", `Moisture level at ${moisture}% verified as ${grade}. Harvest escrow milestone unlocked on-chain.`, hash);
+            evaluateFarmerClaimState();
+            
+            // Log custom event
+            const feed = document.getElementById("event-feed");
+            if (feed) {
+                const time = new Date().toLocaleTimeString();
+                feed.innerHTML += `
+                    <div class="event-item">
+                        <span class="event-time">[${time}]</span>
+                        <span class="event-tag" style="color: #60a5fa;">🔍 QA Approved</span>
+                        <span class="event-body">
+                            Auditor verified delivery of <strong>${grade} crop</strong> (moisture: ${moisture}%). 
+                            Escrow unlocked on-chain. Reference: ${seal}
+                        </span>
+                        <a class="event-hash" href="${currentNetwork === 'TESTNET' ? 'https://stellar.expert/explorer/testnet/tx/' : 'https://stellar.expert/explorer/public/tx/'}${hash}" target="_blank">
+                            Consensus Tx: ${hash.substring(0, 12)}...
+                        </a>
+                    </div>
+                `;
+                feed.scrollTop = feed.scrollHeight;
+            }
+            await fetchContractGlobalStatus();
+        } else {
+            throw new Error("Transaction polling timed out.");
+        }
+    } catch (e) {
+        const parsed = handleError(e, "QA Approval Transaction");
+        updateConsole("error", parsed.title, parsed.message);
+    }
 }
 
-// Listen to contract live events
+// Live Event polling
 async function listenToContractEvents() {
     const feed = document.getElementById("event-feed");
     if (!feed) return;
     try {
-        const info = await fetch(HORIZON_URL).then(res => res.json());
+        const info = await fetch(horizonUrl).then(res => res.json());
         lastPolledLedger = Number(info.history_latest_ledger || 0) - 15;
 
         feed.innerHTML = `
@@ -851,7 +984,7 @@ async function listenToContractEvents() {
         if (lastPolledLedger <= 0) return;
 
         try {
-            const response = await fetch(RPC_URL, {
+            const response = await fetch(rpcUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -863,7 +996,7 @@ async function listenToContractEvents() {
                         filters: [
                             {
                                 type: "contract",
-                                contractIds: [CONTRACT_ID]
+                                contractIds: [contractId]
                             }
                         ],
                         limit: 10
@@ -897,42 +1030,70 @@ async function listenToContractEvents() {
                                 <span class="event-body">
                                     Account <strong>${sourceAddr.substring(0, 6)}...${sourceAddr.substring(sourceAddr.length - 4)}</strong> 
                                     contributed <strong>${amtVal} XLM</strong> to escrow campaign.
-                                        </span>
-                                        <a class="event-hash" href="https://stellar.expert/explorer/testnet/tx/${event.txHash}" target="_blank">
-                                            Consensus Tx: ${event.txHash.substring(0, 12)}...
-                                        </a>
-                                    </div>
-                                `;
-                            } else if (eventName === "claimed") {
-                                eventHtml = `
-                                    <div class="event-item">
-                                        <span class="event-time">[${time}]</span>
-                                        <span class="event-tag" style="color:var(--accent);">🌾 Claimed</span>
-                                        <span class="event-body">
-                                            Farmer <strong>${sourceAddr.substring(0, 6)}...${sourceAddr.substring(sourceAddr.length - 4)}</strong> 
-                                            disbursed <strong>${amtVal} XLM</strong> working capital.
-                                        </span>
-                                        <a class="event-hash" href="https://stellar.expert/explorer/testnet/tx/${event.txHash}" target="_blank">
-                                            Consensus Tx: ${event.txHash.substring(0, 12)}...
-                                        </a>
-                                    </div>
-                                `;
-                            }
-
-                            if (eventHtml) {
-                                feed.innerHTML += eventHtml;
-                                feed.scrollTop = feed.scrollHeight;
-                            }
-                        }
-
-                        if (events.length > 0) {
-                            await fetchContractGlobalStatus();
-                        }
+                                </span>
+                                <a class="event-hash" href="${currentNetwork === 'TESTNET' ? 'https://stellar.expert/explorer/testnet/tx/' : 'https://stellar.expert/explorer/public/tx/'}${event.txHash}" target="_blank">
+                                    Consensus Tx: ${event.txHash.substring(0, 12)}...
+                                </a>
+                            </div>
+                        `;
+                    } else if (eventName === "claimed") {
+                        eventHtml = `
+                            <div class="event-item">
+                                <span class="event-time">[${time}]</span>
+                                <span class="event-tag" style="color:var(--accent);">🌾 Claimed</span>
+                                <span class="event-body">
+                                    Farmer <strong>${sourceAddr.substring(0, 6)}...${sourceAddr.substring(sourceAddr.length - 4)}</strong> 
+                                    disbursed <strong>${amtVal} XLM</strong> working capital.
+                                </span>
+                                <a class="event-hash" href="${currentNetwork === 'TESTNET' ? 'https://stellar.expert/explorer/testnet/tx/' : 'https://stellar.expert/explorer/public/tx/'}${event.txHash}" target="_blank">
+                                    Consensus Tx: ${event.txHash.substring(0, 12)}...
+                                </a>
+                            </div>
+                        `;
+                    } else if (eventName === "approved") {
+                        eventHtml = `
+                            <div class="event-item">
+                                <span class="event-time">[${time}]</span>
+                                <span class="event-tag" style="color:#60a5fa;">🔍 QA Approved</span>
+                                <span class="event-body">
+                                    Inspector <strong>${sourceAddr.substring(0, 6)}...${sourceAddr.substring(sourceAddr.length - 4)}</strong> 
+                                    submitted on-chain crop quality certification approval.
+                                </span>
+                                <a class="event-hash" href="${currentNetwork === 'TESTNET' ? 'https://stellar.expert/explorer/testnet/tx/' : 'https://stellar.expert/explorer/public/tx/'}${event.txHash}" target="_blank">
+                                    Consensus Tx: ${event.txHash.substring(0, 12)}...
+                                </a>
+                            </div>
+                        `;
                     }
-                } catch (e) {
-                    console.error("Soroban events polling exception:", e);
+
+                    if (eventHtml) {
+                        feed.innerHTML += eventHtml;
+                        feed.scrollTop = feed.scrollHeight;
+                    }
                 }
-            }, 6000);
+
+                if (events.length > 0) {
+                    await fetchContractGlobalStatus();
+                }
+            }
+        } catch (e) {
+            console.error("Soroban events polling exception:", e);
+        }
+    }, 6000);
+}
+
+// User-triggered prompt to change the target contract address dynamically
+function changeContractIdPrompt() {
+    const newId = prompt("Enter new Soroban Contract ID:", contractId);
+    if (newId && newId.trim().length === 56) {
+        contractId = newId.trim();
+        document.getElementById("lbl-contract-id").innerText = `${contractId.substring(0, 8)}...${contractId.substring(contractId.length - 8)}`;
+        document.getElementById("lbl-contract-id").title = contractId;
+        updateConsole("success", "Contract Configured", `Switched interface target to contract: ${contractId}`);
+        fetchContractGlobalStatus();
+    } else if (newId) {
+        alert("Invalid Contract ID length. Must be exactly 56 characters.");
+    }
 }
 
 // Setup window bindings for global scope access
@@ -942,3 +1103,4 @@ window.openFarmModal = openFarmModal;
 window.closeFarmModal = closeFarmModal;
 window.nextSlide = nextSlide;
 window.prevSlide = prevSlide;
+window.changeContractIdPrompt = changeContractIdPrompt;
