@@ -88,7 +88,8 @@ Based on user feedback, the following product iterations have been implemented:
 
 ### 1. Onboarded Users (50+ Testnet Wallets)
 We have onboarded **52 testnet users** with verified wallet interactions and feedback:
-*   **Feedback Dataset**: [`docs/agro_pledge_user_feedback.csv`](./docs/agro_pledge_user_feedback.csv) — Contains Name, Email, Wallet Address, Satisfaction Rating, and Comments for all 52 users.
+*   **Feedback Dataset (CSV)**: [`docs/agro_pledge_user_feedback.csv`](./docs/agro_pledge_user_feedback.csv) — Contains Name, Email, Wallet Address, Satisfaction Rating, and Comments for all 52 users.
+*   **Feedback Dataset (Excel Spreadsheet)**: [`docs/agro_pledge_user_feedback.xlsx`](./docs/agro_pledge_user_feedback.xlsx) — Exported Excel workbook listing all 52 user responses.
 *   **Average Satisfaction Rating**: 4.6 / 5.0
 
 ### 2. User Feedback Highlights
@@ -101,6 +102,14 @@ We have onboarded **52 testnet users** with verified wallet interactions and fee
 *   **Cooperative Onboarding**: Partnership with Sumatra Highland Coffee Cooperative to bring 20+ member farmers.
 *   **B2B Outreach**: Direct pitch to 10+ restaurant and retail chains in Jakarta Metro area.
 *   **Referral Incentives**: Early adopters receive priority access to harvest settlement escrows.
+
+### 4. Level 6 Improvements based on User Feedback
+Based on user reviews in our onboarding spreadsheet, the top requested improvements were **enhanced security constraints on escrow releases** and **reducing the possibility of single-party fraud**.
+
+To address this feedback directly, we designed and implemented the **on-chain Cooperative QA Inspector Verification (Multi-Party Escrow Approval Flow)**:
+- **Problem solved**: Previously, the QA inspection was mocked in the UI and escrow releases were done client-side, risking premature claims.
+- **Solution implemented**: The smart contract now registers an independent QA Auditor's address upon campaign initialization. The auditor must explicitly call `approve_harvest` on-chain to sign and lock the delivery moisture level before the farmer can claim the remaining 50% post-harvest settlement.
+- **Git Commit Link**: [Commit 2677876](https://github.com/Umeem26/agro-pledge/commit/2677876bc8904066db25061268c699a500575722) contains the complete Soroban contract enhancements, updated unit test suites, and dynamic Web UI network integrations.
 
 ---
 
