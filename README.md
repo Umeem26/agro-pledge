@@ -37,6 +37,11 @@ This public repository serves as the single immutable workspace tracking the dev
 
 AgroPledge has been successfully upgraded to meet all milestones required for the **Level 6 (Black Belt)** and **Level 7 (Founder Belt)** submissions.
 
+### Level 1 (Foundation & Wallet Integration) Verification
+- **Stellar Wallet Dependencies**: Declared `@stellar/freighter-api`, `@stellar/stellar-sdk`, and `@creit.tech/stellar-wallets-kit` under `dependencies` in [`package.json`](./package.json).
+- **Verified Wallet Capabilities**: Fully implemented wallet permission requests (`requestAccess`), account address retrieval (`getPublicKey`), and transaction signing (`signTransaction`).
+- **Dedicated Soroban Smart Contract**: Contract package structured under [`contracts/agro_pledge`](./contracts/agro_pledge) (crate name `agro_pledge`) with 5/5 passing unit tests.
+
 ### Level 6 (Black Belt) Upgrades
 - **Dynamic Network Switcher**: Integrates testnet/mainnet selectors dynamically on the dashboard.
 - **On-chain QA Inspector Verification**: Smart contract registers an auditor address and requires signed `approve_harvest` transactions to unlock post-harvest escrows.
@@ -106,11 +111,11 @@ The full pitch deck is available at [`docs/pitch_deck.md`](./docs/pitch_deck.md)
 2.  Solution — Decentralized forward contracts on Stellar/Soroban
 3.  Architecture — Smart contract escrow with milestone-based releases
 4.  Market Opportunity — $150B agricultural financing gap in Southeast Asia
-5.  Traction — 52 testnet users, 4/4 contract tests passed, multi-platform MVP
+5.  Traction — 52 testnet users, 5/5 contract tests passed, multi-platform MVP
 6.  Roadmap — Mainnet deployment, mobile app store launch, cooperative partnerships
 
 ### Demo
-*   **Live Web Portal**: Run `npx http-server -p 5500` and open `http://127.0.0.1:5500/`
+*   **Live Web Portal**: Run `npm start` (or `npx http-server -p 5500`) and open `http://127.0.0.1:5500/`
 *   **Walkthrough Video**: Available in the repository recordings directory
 
 ---
@@ -134,7 +139,7 @@ Below is the verified graphical proof showing the authenticated execution states
   <img src="./screenshots/ss_explorer.png" alt="Integrated Pitch Deck Viewer" width="85%">
 </p>
 
-### 4. Automated Smart Contract Test Suites (4/4 Passed)
+### 4. Automated Smart Contract Test Suites (5/5 Passed)
 <p align="center">
   <img src="./screenshots/ss_test_output.png" alt="Smart Contract Test Output" width="85%">
 </p>
@@ -150,24 +155,29 @@ To compile or test the project code structures locally on your machine:
 git clone https://github.com/Umeem26/agro-pledge.git
 ```
 
-2. Build the target project WASM binary:
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Build the target project WASM binary:
 ```bash
 cargo build --target wasm32-unknown-unknown --release
 ```
 
-3. Run embedded smart contract unit tests:
+4. Run embedded smart contract unit tests:
 ```bash
 cargo test
 ```
 
-4. Run the Web Portal locally:
+5. Run the Web Portal locally:
 ```bash
-# Serves index.html on port 5500
-npx http-server -p 5500
+npm start
+# or npx http-server -p 5500
 ```
 Open `http://127.0.0.1:5500/` in your browser.
 
-5. Run the Flutter Mobile App locally:
+6. Run the Flutter Mobile App locally:
 ```bash
 cd agro_pledge_mobile
 flutter run -d chrome

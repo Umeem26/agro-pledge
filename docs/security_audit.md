@@ -1,6 +1,6 @@
 # 🛡️ AgroPledge Smart Contract Security Audit & Review
 
-This document provides a comprehensive security review and vulnerability assessment of the **AgroPledge Soroban Smart Contract** (`contracts/notes/src/lib.rs`) for its Level 6 (Black Belt) Mainnet-readiness.
+This document provides a comprehensive security review and vulnerability assessment of the **AgroPledge Soroban Smart Contract** (`contracts/agro_pledge/src/lib.rs`) for its Level 6 (Black Belt) Mainnet-readiness.
 
 ---
 
@@ -76,7 +76,7 @@ Inter-contract token transfers (`token_client.transfer`) operate synchronously i
 
 ## 🧪 Testing Coverage & Validation
 
-All edge cases are covered by Rust unit tests in `contracts/notes/src/test.rs`. The test suite covers:
+All edge cases are covered by Rust unit tests in `contracts/agro_pledge/src/test.rs`. The test suite covers:
 - Dynamic initialization checks.
 - On-chain token escrows and transfers.
 - Strict milestone sequencing (upfront before harvest).
